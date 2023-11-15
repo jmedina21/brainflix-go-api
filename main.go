@@ -8,6 +8,7 @@ import (
 func main (){
 	app := fiber.New()
 	Routers(app)
+	app.Static("/", "./public")
 	app.Listen(":8000")
 }
 
