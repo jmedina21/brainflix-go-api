@@ -61,21 +61,18 @@ func GetVideo(c * fiber.Ctx) error  {
 		})
 	}
 
-	videoToSend := Video{}
 	for _, video := range videos {
 		if video.ID == id {
-			videoToSend = video
-		}else {
-			c.Status(404).JSON(fiber.Map{
-				"status": "error",
-				"message": `Cannot find video with id ` + id,
+			return c.Status(200).JSON(fiber.Map{
+				"status": "success",
+				"data": video,
 			})
 		}
 	}
 
-	return c.Status(200).JSON(fiber.Map{
-		"status": "success",
-		"data": videoToSend,
+	return c.Status(404).JSON(fiber.Map{
+		"status": "error",
+		"message": "Video not found",
 	})
 }
 
