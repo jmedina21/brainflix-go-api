@@ -2,17 +2,18 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/jmedina21/brainflix-go-api/routes/videos"
 )
 
 func main (){
 	app := fiber.New()
 
-	app.Get("/videos", func(c * fiber.Ctx) error {
-		return c.Status(200).JSON(fiber.Map{
-			"success": true,
-			"message": "All videos",
-		})
-	})
-
 	app.Listen(":8000")
+}
+
+func Routers(app * fiber.App)  {
+	app.Get("/videos", videos.GetVideos)
+	app.Get("/videos/:id", videos.GetVideo)
+	app.Post("/videos", videos.NewVideo)
+	app.Post("/videos/:id/comments", videos.NewComment)	
 }
