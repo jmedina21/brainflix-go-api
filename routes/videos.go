@@ -91,6 +91,7 @@ func NewVideo(c * fiber.Ctx) error {
 	type Request struct {
 		Title       string `json:"title"`
 		Description string `json:"description"`
+		Image	 	string `json:"image"`
 	}
 
 	var req Request
@@ -113,7 +114,7 @@ func NewVideo(c * fiber.Ctx) error {
 		ID: uuid.New().String(),
 		Title: req.Title,
 		Channel: "jpmmKnowsGo",
-		Image: "https://ih1.redbubble.net/image.566095950.3281/flat,750x,075,f-pad,750x1000,f8f8f8.u1.jpg",
+		Image: req.Image,
 		Description: req.Description,
 		Views: "0",
 		Likes: "0",
