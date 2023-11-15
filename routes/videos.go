@@ -27,22 +27,11 @@ type Summary struct {
 }
 
 func GetVideos(c * fiber.Ctx) error  {
-	file, err := os.Open("./video-details.json")
+	videos, err := ReadFile()
 	if err != nil {
 		c.Status(500).JSON(fiber.Map{
 			"status": "error",
-			"message": err,
-		})
-	}
-
-	defer file.Close()
-
-	videos := []Video{}
-
-	decoder := json.NewDecoder((file))
-	if err := decoder.Decode(&videos); err != nil {
-		c.Status((500)).JSON(fiber.Map{
-			"status": "error",
+			"message": `Cannot read file` + err.Error(),
 		})
 	}
 
@@ -60,4 +49,50 @@ func GetVideos(c * fiber.Ctx) error  {
 		"status": "success",
 		"data": summaries,
 	})
+}
+
+func GetVideo(c * fiber.Ctx) error  {
+	id := c.Params("id")
+	videos, err := ReadFile()
+	if err != nil {
+		c.Status(500).JSON(fiber.Map{
+			"status": "error",
+			"message": `Cannot read file` + err.Error(),
+		})
+	}
+
+	videoToSend := Video{}
+	for _, video := range videos {
+		if video.ID == id {
+			videoToSend = video
+		}else {
+			c.Status(404).JSON(fiber.Map{
+				"status": "error",
+				"message": `Cannot find video with id ` + id,
+			})
+		}
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"status": "success",
+		"data": videoToSend,
+	})
+}
+
+func ReadFile () ([]Video, error) {
+	file, err := os.Open("./video-details.json")
+	if err != nil {
+		return nil, err
+	}
+
+	defer file.Close()
+
+	videos := []Video{}
+
+	decoder := json.NewDecoder((file))
+	if err := decoder.Decode(&videos); err != nil {
+		return nil, err
+	}
+
+	return videos, nil
 }
