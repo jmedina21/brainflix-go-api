@@ -1,11 +1,11 @@
 package videos
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"os"
 	"encoding/json"
-	"github.com/google/uuid"
+	"os"
 	"time"
+	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type Video struct {
@@ -18,14 +18,16 @@ type Video struct {
 	Likes		string `json:"likes"`
 	Duration 	string `json:"duration"`
 	Video 		string `json:"video"`
-	Timestamp 	int64 `json:"timestamp"`
+	Timestamp 	int64  `json:"timestamp"`
 	Comments 	[]Comment `json:"comments"`
 }
 
 type Comment struct {
+	ID 			string `json:"id"`
 	Name 		string `json:"name"`
 	Comment 	string `json:"comment"`
-	Timestamp 	int64 `json:"timestamp"`
+	Likes 		int64  `json:"likes"`
+	Timestamp 	int64  `json:"timestamp"`
 }
 
 type Summary struct {
@@ -137,6 +139,60 @@ func NewVideo(c * fiber.Ctx) error {
 	})
 }
 
+
+func NewComment(c *fiber.Ctx) error {
+	type ReceivedComment struct {
+		Name 		string `json:"name"`
+		Comment 	string `json:"comment"`
+	}
+
+	var req ReceivedComment
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Invalid request body",
+		})
+	}
+
+	id := c.Params("id")
+	videos, err := ReadFile()
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"status": "error",
+			"message": `Cannot read file` + err.Error(),
+		})
+	}
+
+	for i, video := range videos {
+		if video.ID == id {
+			newComment := Comment{
+				ID: uuid.New().String(),
+				Name: req.Name,
+				Comment: req.Comment,
+				Likes: 0,
+				Timestamp: time.Now().Unix(),
+			}
+			videos[i].Comments = append(videos[i].Comments, newComment)
+			err = WriteFile(videos, "./video-details.json")
+			if err != nil {
+				return c.Status(500).JSON(fiber.Map{
+					"status": "error",
+					"message": `Cannot write file` + err.Error(),
+				})
+			}
+			return c.Status(201).JSON(fiber.Map{
+				"status": "success",
+				"data": newComment,
+			})
+		}
+	}
+
+	return c.Status(404).JSON(fiber.Map{
+		"status": "error",
+		"message": "Video not found",
+	})
+}
+
 func ReadFile () ([]Video, error) {
 	file, err := os.Open("./video-details.json")
 	if err != nil {
@@ -164,6 +220,8 @@ func WriteFile (videos []Video, path string) error {
 	defer file.Close()
 
 	encoder := json.NewEncoder(file)
+
+	encoder.SetIndent("", "    ")
 
 	if err := encoder.Encode(&videos); err != nil {
 		return err

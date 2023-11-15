@@ -15,5 +15,5 @@ func Routers(app * fiber.App)  {
 	app.Get("/videos", videos.GetVideos)
 	app.Get("/videos/:id", videos.GetVideo)
 	app.Post("/videos", videos.NewVideo)
-	// app.Post("/videos/:id/comments", videos.NewComment)	
+	app.Post("/videos/:id/comments", videos.NewComment)	
 }
