@@ -3,7 +3,7 @@ module github.com/jmedina21/brainflix-go-api
 go 1.21.3
 
 require (
-	github.com/gofiber/fiber/v2 v2.52.1
+	github.com/gofiber/fiber/v2 v2.52.5
 	github.com/google/uuid v1.5.0
 )
 
